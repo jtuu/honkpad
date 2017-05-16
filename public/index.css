@@ -1,0 +1,56 @@
+html{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  height: 100%;
+  position: relative;
+  background: hsl(0, 0%, 30%);
+  display: flex;
+  flex-direction: row;
+}
+
+#firepad, #honkpad-log{
+  width: 50%;
+  height: 100%;
+}
+
+.honkpad-log-line{
+  white-space: pre;
+}
+
+.honkpad-log-line.default{
+
+}
+
+.honkpad-log-line.warning{
+  color: purple;
+}
+
+.honkpad-log-line.error{
+  color: red;
+}
+
+.honkpad-log-line.success{
+  color: green;
+}
+
+#honkpad-button-container{
+  position: fixed;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+.honkpad-button{
+  padding: 5px;
+}
+
+#compile{
+  background: blue;
+}
+
+#run{
+  background: green;
+}
