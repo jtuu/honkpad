@@ -4,8 +4,7 @@ const fs = require("fs"),
       child_process = require("child_process"),
       express = require("express"),
       app = express(),
-      http = require("http").Server(app),
-      io = require("socket.io")(http),
+      socketio = require("socket.io"),
       firebaseConfig = require("./public/firebase-config.json"),
       firebase = require("firebase"),
       firepad = require("firepad"),
@@ -18,8 +17,9 @@ const fs = require("fs"),
       compileOptions = ["-std=c++11", "-Wall", "-o" + outFilename],
       dockerOptions = ["run", "--name=" + distroName, `--volume=${dockerWorkDir}/${outFilename}:/${outFilename}`, "--rm=true", "--tty=true", distroName, "/" + outFilename],
       OK = 0;
+var io;
 
-app.use(express.static("public"));
+app.use(express.static(__dirname + "/public"));
 
 firebase.initializeApp({databaseURL: firebaseConfig.databaseURL});
 const firebaseRef = firebase.database().ref();
@@ -125,18 +125,23 @@ function onExecuteRequest(roomname){
   });
 }
 
-io.on("connect", socket => {
-  var roomname = "default";
-  socket.join("default");
+module.exports = function init(server){
+  if(!io){
+    io = socketio(server);
+    io.on("connect", socket => {
+      var roomname = "default";
+      socket.join("default");
 
-  socket.on("meta:join", roomToJoin => {
-    roomname = roomToJoin;
-    socket.join(roomname);
-  });
+      socket.on("meta:join", roomToJoin => {
+        roomname = roomToJoin;
+        socket.join(roomname);
+      });
 
-  socket.on("compiler:compile", () => onCompileRequest(roomname));
-  socket.on("exec:execute", () => onExecuteRequest(roomname));
-});
+      socket.on("compiler:compile", () => onCompileRequest(roomname));
+      socket.on("exec:execute", () => onExecuteRequest(roomname));
+    });
+  }
+  return app;
+}
 
-http.listen(3000);
 getSourceFile();
