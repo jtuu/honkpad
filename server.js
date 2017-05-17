@@ -148,7 +148,7 @@ function onExecuteRequest(roomname){
     if(code === OK){
       io.to(roomname).emit("exec:success");
     }else{
-      io.to(roomname).emit("exec:fail");
+      io.to(roomname).emit("exec:fail", code);
     }
   });
 }

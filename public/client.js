@@ -67,7 +67,7 @@ function init(){
   socket.on("exec:begin", data => log("Running...", "info"));
   socket.on("exec:out", data => log(data));
   socket.on("exec:error", data => log(data || "There was an error.", "warning"));
-  socket.on("exec:fail", data => log(data || "There was an error.", "error"));
+  socket.on("exec:fail", data => log("Exited with code: " + data, "error"));
   socket.on("exec:success", data => log(data || "Finished running successfully.", "success"));
 
   compileButton.addEventListener("click", e => {
