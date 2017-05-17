@@ -1,9 +1,13 @@
 const logContainer = document.getElementById("honkpad-log");
 function log(text, style = "default"){
+  const isScrolledToBottom = logContainer.scrollHeight - logContainer.clientHeight <= logContainer.scrollTop + 1;
   const textEl = document.createElement("div");
   textEl.className = "honkpad-log-line " + style;
   textEl.textContent = text;
   logContainer.appendChild(textEl);
+  if(isScrolledToBottom){
+    logContainer.scrollTop = logContainer.scrollHeight - logContainer.clientHeight;
+  }
 }
 
 function clearLog(){
@@ -38,11 +42,16 @@ function init(){
     });
 
   const socket = io.connect(location.origin);
+  socket.on("compiler:begin", data => {
+    clearLog();
+    log("Compiling...", "info");
+  });
   socket.on("compiler:out", data => log(data));
   socket.on("compiler:error", data => log(data || "There was an error.", "warning"));
   socket.on("compiler:fail", data => log(data || "There was an error.", "error"));
-  socket.on("compiler:success", data => log(data, "success"));
+  socket.on("compiler:success", data => log("Finished compiling successfully.", "success"));
 
+  socket.on("exec:begin", data => log("Running...", "info"));
   socket.on("exec:out", data => log(data));
   socket.on("exec:error", data => log(data || "There was an error.", "warning"));
   socket.on("exec:fail", data => log(data || "There was an error.", "error"));

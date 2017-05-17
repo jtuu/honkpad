@@ -9,11 +9,12 @@ const fs = require("fs"),
       firebaseConfig = require("./public/firebase-config.json"),
       firebase = require("firebase"),
       firepad = require("firepad"),
-      distroName = child_process.execSync("lsb_release -si", {encoding: "utf8"}).trim().toLowerCase(),
+      //distroName = child_process.execSync("lsb_release -si", {encoding: "utf8"}).trim().toLowerCase(),
+      distroName = "ubuntu",
       compilerName = "g++",
       dockerWorkDir = path.resolve("./docker"),
-      sourceFilename = "hello.cpp",
-      outFilename = "hello",
+      sourceFilename = "file.cpp",
+      outFilename = "file",
       compileOptions = ["-std=c++11", "-Wall", "-o" + outFilename],
       dockerOptions = ["run", "--name=" + distroName, `--volume=${dockerWorkDir}/${outFilename}:/${outFilename}`, "--rm=true", "--tty=true", distroName, "/" + outFilename],
       OK = 0;
@@ -73,6 +74,7 @@ function onCompileRequest(roomname){
         }
 
         const proc = compile(sourceFilename);
+        io.to(roomname).emit("compiler:begin");
         proc.stdout.on("data", data => {
           io.to(roomname).emit("compiler:out", data);
         });
@@ -103,6 +105,7 @@ function executeInContainer(){
 
 function onExecuteRequest(roomname){
   const proc = executeInContainer();
+  io.to(roomname).emit("exec:begin");
   proc.stdout.on("data", data => {
     io.to(roomname).emit("exec:out", data);
   });
