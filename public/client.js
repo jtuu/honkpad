@@ -1,10 +1,23 @@
 const logContainer = document.getElementById("honkpad-log");
 function log(text, style = "default"){
   const isScrolledToBottom = logContainer.scrollHeight - logContainer.clientHeight <= logContainer.scrollTop + 1;
+
+  const lineEl = document.createElement("div");
+  const timeEl = document.createElement("div");
   const textEl = document.createElement("div");
-  textEl.className = "honkpad-log-line " + style;
+
+  lineEl.className = "honkpad-log-line";
+
+  timeEl.className = "honkpad-log-time";
+  timeEl.textContent = `${Date().slice(16, 24)}`;
+
+  textEl.className = "honkpad-log-text " + style;
   textEl.textContent = text;
-  logContainer.appendChild(textEl);
+
+  lineEl.appendChild(timeEl);
+  lineEl.appendChild(textEl);
+  logContainer.appendChild(lineEl);
+
   if(isScrolledToBottom){
     logContainer.scrollTop = logContainer.scrollHeight - logContainer.clientHeight;
   }
@@ -55,7 +68,7 @@ function init(){
   socket.on("exec:out", data => log(data));
   socket.on("exec:error", data => log(data || "There was an error.", "warning"));
   socket.on("exec:fail", data => log(data || "There was an error.", "error"));
-  socket.on("exec:success", data => log(data, "success"));
+  socket.on("exec:success", data => log(data || "Finished running successfully.", "success"));
 
   compileButton.addEventListener("click", e => {
     socket.emit("compiler:compile");

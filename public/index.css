@@ -18,39 +18,52 @@ body{
 
 #honkpad-log{
   overflow-y: auto;
+  box-sizing: border-box;
+  padding: 5px;
 }
 
 .honkpad-log-line{
   white-space: pre-wrap;
   font-family: monospace;
-  padding: 2px;
+  line-height: 1em;
 }
 
-.honkpad-log-line:nth-child(odd){
+.honkpad-log-line > *{
+  display: inline-block;
+}
+
+.honkpad-log-time{
+  color: hsl(0, 0%, 30%);
+  padding-right: 5px;
+}
+
+.honkpad-log-text{}
+
+.honkpad-log-text:nth-child(odd){
   background: hsl(0, 0%, 12%);
 }
 
-.honkpad-log-line:nth-child(even){
+.honkpad-log-text:nth-child(even){
   background: hsl(0, 0%, 13%);
 }
 
-.honkpad-log-line.default{
+.honkpad-log-text.default{
   color: white;
 }
 
-.honkpad-log-line.warning{
+.honkpad-log-text.warning{
   color: hsl(300, 85%, 52%);
 }
 
-.honkpad-log-line.error{
+.honkpad-log-text.error{
   color: red;
 }
 
-.honkpad-log-line.success{
+.honkpad-log-text.success{
   color: hsl(127, 100%, 30%);
 }
 
-.honkpad-log-line.info{
+.honkpad-log-text.info{
   color: hsl(222, 100%, 59%);
 }
 
