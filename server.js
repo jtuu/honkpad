@@ -97,7 +97,12 @@ function onCompileRequest(roomname){
 }
 
 function executeInContainer(){
-  const proc = child_process.spawn("docker", dockerOptions, {cwd: dockerWorkDir});
+  const proc = child_process.spawn("docker", dockerOptions, {
+    cwd: dockerWorkDir,
+    detached: true,
+    stdio: ["ignore", "pipe", "pipe"],
+    timeout: 30 * 1000
+  });
   proc.stderr.setEncoding("utf8");
   proc.stdout.setEncoding("utf8");
   return proc;
@@ -105,9 +110,32 @@ function executeInContainer(){
 
 function onExecuteRequest(roomname){
   const proc = executeInContainer();
+  proc.unref();
+
   io.to(roomname).emit("exec:begin");
+  /*
   proc.stdout.on("data", data => {
     io.to(roomname).emit("exec:out", data);
+  });
+  */
+  proc.stdout.on("readable", () => {
+    var chunk = proc.stdout.read(1), str = "";
+
+    do {
+      switch(chunk){
+        case null:
+          if(str) io.to(roomname).emit("exec:out", str);
+          break;
+        case "\n":
+          if(str) io.to(roomname).emit("exec:out", str);
+          str = "";
+          break;
+        case "\r":
+          break;
+        default:
+          str += chunk;
+      }
+    } while(null !== (chunk = proc.stdout.read(1)));
   });
   proc.stderr.on("data", data => {
     io.to(roomname).emit("exec:error", data);
