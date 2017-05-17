@@ -11,7 +11,7 @@ const fs = require("fs"),
       //distroName = child_process.execSync("lsb_release -si", {encoding: "utf8"}).trim().toLowerCase(),
       distroName = "ubuntu",
       compilerName = "g++",
-      dockerWorkDir = path.resolve("./docker"),
+      dockerWorkDir = path.resolve(__dirname + "/docker"),
       sourceFilename = "file.cpp",
       outFilename = "file",
       compileOptions = ["-std=c++11", "-Wall", "-o" + outFilename],
@@ -127,7 +127,7 @@ function onExecuteRequest(roomname){
 
 module.exports = function init(server){
   if(!io){
-    io = socketio(server);
+    io = socketio(server, {path: "/honkpad/socket.io"});
     io.on("connect", socket => {
       var roomname = "default";
       socket.join("default");

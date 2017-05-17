@@ -41,7 +41,7 @@ function init(){
 
     });
 
-  const socket = io.connect(location.origin);
+  const socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
   socket.on("compiler:begin", data => {
     clearLog();
     log("Compiling...", "info");
