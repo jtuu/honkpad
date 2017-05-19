@@ -16,6 +16,10 @@ body{
   height: 100%;
 }
 
+.CodeMirror{
+  height: 100%;
+}
+
 #honkpad-log{
   overflow-y: auto;
   box-sizing: border-box;
@@ -69,31 +73,135 @@ body{
 
 #honkpad-button-container{
   position: fixed;
-  left: 50%;
+  left: calc(50% + 20px);
   top: 0;
   transform: translateX(-100%);
   font-family: sans-serif;
   color: white;
   cursor: pointer;
-  z-index: 2;
+  z-index: 6;
 }
 
 .honkpad-button{
   padding: 5px;
 }
 
-.honkpad-button:hover{
-  outline: 1px solid black;
-}
-
-.honkpad-button:active{
-  color: orange;
-}
-
 #compile{
-  background: blue;
+  background: hsl(240, 50%, 50%);
+}
+
+#compile:hover{
+  background: hsl(240, 50%, 60%);
+}
+
+#compile:active{
+  background: hsl(240, 50%, 55%);
 }
 
 #run{
-  background: green;
+  background: hsl(120, 50%, 50%);
+}
+
+#run:hover{
+  background: hsl(120, 50%, 60%);
+}
+
+#run:active{
+  background: hsl(120, 50%, 55%);
+}
+
+#honkpad-roomlist-wrap{
+  width: 40px;
+  z-index: 5;
+  position: relative;
+  font-family: sans-serif;
+}
+
+#honkpad-roomlist-title{
+  color: white;
+  position: absolute;
+  font-size: 2em;
+  transform: rotateZ(90deg);
+  transform-origin: 0.25em 1em;
+  transition: transform 0.5s;
+  top: 0;
+  pointer-events: none;
+}
+
+#honkpad-roomlist-container{
+  background: black;
+  width: 230px;
+  height: 100%;
+  margin-left: -190px;
+  transition: margin-left 0.5s;
+  padding-top: 2em;
+  box-sizing: border-box;
+}
+
+#honkpad-roomlist-container:hover{
+  margin-left: 0px;
+}
+
+#honkpad-roomlist-container:hover + #honkpad-roomlist-title{
+  transform: rotateZ(0deg);
+}
+
+.honkpad-roomlist-item{
+  color: white;
+  cursor: pointer;
+  background: hsl(0, 0%, 10%);
+  display: flex;
+  flex-direction: row;
+}
+
+.honkpad-roomlist-item-active > .honkpad-roomlist-item-text{
+  color: hsl(120, 50%, 50%);
+  background: hsl(120, 50%, 10%);
+}
+
+.honkpad-roomlist-item + .honkpad-roomlist-item{
+  margin-top: 4px;
+}
+
+.honkpad-roomlist-item-text{
+  width: 100%;
+}
+
+.honkpad-roomlist-item-text:hover{
+  background: hsl(0, 0%, 15%);
+}
+
+.honkpad-roomlist-item-text:active{
+  background: hsl(0, 0%, 12%);
+}
+
+.honkpad-roomlist-item-deletebutton{
+  color: red;
+  margin-right: 4px;
+}
+
+.honkpad-roomlist-item-deletebutton:hover{
+  background: hsl(0, 0%, 20%);
+}
+
+#honkpad-roomlist-createbutton{
+  margin-top: 10px;
+  margin-left: 10px;
+  color: black;
+  background: hsl(0, 0%, 85%);
+  cursor: pointer;
+  width: 25%;
+  padding-left: 4px;
+}
+
+#honkpad-roomlist-createbutton:hover{
+  background: hsl(0, 0%, 92%);
+}
+
+#honkpad-roomlist-createbutton:active{
+  background: hsl(0, 0%, 88%);
+}
+
+.powered-by-firepad{
+  display: none;
 }
