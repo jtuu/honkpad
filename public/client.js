@@ -1,10 +1,9 @@
 const logContainer = document.getElementById("honkpad-log");
 function log(text, style = "default"){
-  const isScrolledToBottom = logContainer.scrollHeight - logContainer.clientHeight <= logContainer.scrollTop + 1;
-
-  const lineEl = document.createElement("div");
-  const timeEl = document.createElement("div");
-  const textEl = document.createElement("div");
+  const isScrolledToBottom = logContainer.scrollHeight - logContainer.clientHeight <= logContainer.scrollTop + 1,
+        lineEl = document.createElement("div"),
+        timeEl = document.createElement("div"),
+        textEl = document.createElement("div");
 
   lineEl.className = "honkpad-log-line";
 
@@ -29,8 +28,8 @@ function clearLog(){
   }
 }
 
-const compileButton = document.getElementById("compile");
-const runButton = document.getElementById("run");
+const compileButton = document.getElementById("compile"),
+      runButton = document.getElementById("run");
 
 function init(){
   fetch("firebase-config.json")
@@ -54,7 +53,9 @@ function init(){
 
     });
 
-  const socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
+  const decoder = new TextDecoder(),
+        newline = /\r\n|\n/,
+        socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
   socket.on("compiler:begin", data => {
     clearLog();
     log("Compiling...", "info");
@@ -65,7 +66,12 @@ function init(){
   socket.on("compiler:success", data => log("Finished compiling successfully.", "success"));
 
   socket.on("exec:begin", data => log("Running...", "info"));
-  socket.on("exec:out", data => log(data));
+  socket.on("exec:out", data => {
+    const str = decoder.decode(data);
+    for(const line of str.split(newline)){
+      if(line) log(line);
+    }
+  });
   socket.on("exec:error", data => log(data || "There was an error.", "warning"));
   socket.on("exec:fail", data => log("Exited with code: " + data, "error"));
   socket.on("exec:success", data => log(data || "Finished running successfully.", "success"));
