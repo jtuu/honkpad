@@ -2,8 +2,9 @@ const logContainer = document.getElementById("honkpad-log"),
       roomlist = new Set(),
       roomlistContainer = document.getElementById("honkpad-roomlist-container"),
       createRoomButton = document.getElementById("honkpad-roomlist-createbutton"),
-      compileButton = document.getElementById("compile"),
-      runButton = document.getElementById("run"),
+      compileButton = document.getElementById("honkpad-compile"),
+      runButton = document.getElementById("honkpad-run"),
+      aboutButton = document.getElementById("honkpad-about"),
       codemirror = CodeMirror(document.getElementById("firepad"), {
         lineNumbers: true,
         matchBrackets: true,
@@ -37,6 +38,8 @@ socket.on("exec:error", data => log(data || "There was an error.", "warning"));
 socket.on("exec:fail", data => log("Exited with code: " + data, "error"));
 socket.on("exec:success", data => log(data || "Finished running successfully.", "success"));
 
+socket.on("meta:about", data => log(data));
+
 socket.on("disconnect", () => {
   leaveRoom();
   while(roomlistContainer.firstChild){
@@ -53,6 +56,9 @@ runButton.addEventListener("click", e => {
 });
 createRoomButton.addEventListener("click", e => {
   joinRoom(prompt("What should the name of the new room be? Name must be alphanumeric."));
+});
+aboutButton.addEventListener("click", e => {
+  socket.emit("meta:about");
 });
 
 function log(text, style = "default"){

@@ -86,27 +86,27 @@ body{
   padding: 5px;
 }
 
-#compile{
+#honkpad-compile{
   background: hsl(240, 50%, 50%);
 }
 
-#compile:hover{
+#honkpad-compile:hover{
   background: hsl(240, 50%, 60%);
 }
 
-#compile:active{
+#honkpad-compile:active{
   background: hsl(240, 50%, 55%);
 }
 
-#run{
+#honkpad-run{
   background: hsl(120, 50%, 50%);
 }
 
-#run:hover{
+#honkpad-run:hover{
   background: hsl(120, 50%, 60%);
 }
 
-#run:active{
+#honkpad-run:active{
   background: hsl(120, 50%, 55%);
 }
 
@@ -204,4 +204,28 @@ body{
 
 .powered-by-firepad{
   display: none;
+}
+
+#honkpad-about{
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  border-radius: 50%;
+  opacity: 0.1;
+  background: hsl(0, 0%, 90%);
+  font-size: 2em;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  cursor: pointer;
+  user-select: none;
+}
+
+#honkpad-about:hover{
+  opacity: 0.2;
+}
+
+#honkpad-about:active{
+  opacity: 0.15;
 }

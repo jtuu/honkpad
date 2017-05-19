@@ -24,6 +24,7 @@ const fs = require("fs"),
       firepad = require("firepad"),
       distroName = "ubuntu",
       compilerName = "g++",
+      compilerOptions = ["-std=c++11", "-Wall"],
       dockerWorkDir = path.resolve(__dirname + "/docker"),
       OK = 0,
       roomlist = new DefaultMap(0),
@@ -47,7 +48,7 @@ function getCompilerInfo(){
 
     function onOutput(data){
       const version = data.split("\n")[0];
-      resolve(version);
+      resolve(`${version}. Using options: ${compilerOptions.join(" ")}.`);
       proc.stdout.removeListener("data", onOutput);
       proc.stderr.removeListener("data", onError);
     }
@@ -63,7 +64,7 @@ function getCompilerInfo(){
 }
 
 function compile(filename){
-  const options = ["-std=c++11", "-Wall", "-o" + filename, filename + ".cpp"],
+  const options = compilerOptions.concat(["-o" + filename, filename + ".cpp"]),
         proc = child_process.spawn(compilerName, options, {cwd: dockerWorkDir});
   proc.stderr.setEncoding("utf8");
   proc.stdout.setEncoding("utf8");
@@ -181,6 +182,12 @@ module.exports = function init(server){
 
       socket.on("compiler:compile", () => onCompileRequest(roomname));
       socket.on("exec:execute", () => onExecuteRequest(roomname));
+
+      socket.on("meta:about", () => {
+        getCompilerInfo().then(compilerInfo => {
+          socket.emit("meta:about", `Compiler: ${compilerInfo}`);
+        });
+      });
 
       socket.on("disconnect", () => {
         if(roomname){
