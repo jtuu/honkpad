@@ -1,4 +1,5 @@
 const logContainer = document.getElementById("honkpad-log"),
+      logMaxSize = 500,
       roomlist = new Set(),
       roomlistContainer = document.getElementById("honkpad-roomlist-container"),
       createRoomButton = document.getElementById("honkpad-roomlist-createbutton"),
@@ -78,6 +79,10 @@ function log(text, style = "default"){
   lineEl.appendChild(timeEl);
   lineEl.appendChild(textEl);
   logContainer.appendChild(lineEl);
+
+  if(logContainer.childElementCount > logMaxSize){
+    logContainer.removeChild(logContainer.firstChild);
+  }
 
   if(isScrolledToBottom){
     logContainer.scrollTop = logContainer.scrollHeight - logContainer.clientHeight;
