@@ -21,9 +21,11 @@ const logContainer = document.getElementById("honkpad-log"),
       newline = /\r\n|\n/,
       socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
 
-var firepad, currentRoom;
+var firepad,
+    currentRoom = localStorage.getItem("currentRoom") || undefined;
 
-firepadContainer.style.flexGrow = logContainer.style.flexGrow = 1;
+firepadContainer.style.flexGrow = localStorage.getItem("firepadContainer.style.flexGrow") || 1;
+logContainer.style.flexGrow = localStorage.getItem("logContainer.style.flexGrow") || 1;
 
 socket.on("compiler:begin", data => {
   clearLog();
@@ -93,6 +95,13 @@ resizeEl.addEventListener("mousedown", e => {
   window.addEventListener("mousemove", onmousemove);
 });
 
+window.addEventListener("beforeunload", e => {
+  localStorage.setItem("firepadContainer.style.flexGrow", firepadContainer.style.flexGrow);
+  localStorage.setItem("logContainer.style.flexGrow", logContainer.style.flexGrow);
+
+  localStorage.setItem("currentRoom", currentRoom);
+});
+
 function log(text, style = "default"){
   const isScrolledToBottom = logContainer.scrollHeight - logContainer.clientHeight <= logContainer.scrollTop + 1,
         lineEl = document.createElement("div"),
@@ -145,7 +154,7 @@ const getFirebaseConfig = (() => {
 
 getFirebaseConfig().then(config => {
   firebase.initializeApp(config);
-  joinRoom();
+  joinRoom(currentRoom);
 
   const ref = firebase.database().ref().orderByKey();
   ref.on("child_added", (data) => {
@@ -192,8 +201,8 @@ getFirebaseConfig().then(config => {
 });
 
 function leaveRoom(){
-  if(currentRoom){
-    const roomEl = document.getElementById("honkpad-roomlist-item-" + currentRoom);
+  const roomEl = document.getElementById("honkpad-roomlist-item-" + currentRoom);
+  if(roomEl){
     roomEl.classList.remove("honkpad-roomlist-item-active");
   }
 
