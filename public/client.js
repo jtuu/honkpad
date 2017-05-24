@@ -90,6 +90,7 @@ resizeEl.addEventListener("mousedown", e => {
   function onmouseup(){
     document.body.style.cursor = "";
     isMouseDown = false;
+    codemirror.refresh();
     window.removeEventListener("mousemove", onmousemove);
     window.removeEventListener("mouseup", onmouseup);
   }
