@@ -7,8 +7,8 @@ const logContainer = document.getElementById("honkpad-log"),
       runButton = document.getElementById("honkpad-run"),
       aboutButton = document.getElementById("honkpad-about"),
       resizeEl = document.getElementById("honkpad-log-resize"),
-      resizeFlexMin = 0,
-      resizeFlexMax = 2,
+      resizeWidthMin = 0,
+      resizeWidthMax = 100,
       firepadContainer = document.getElementById("firepad"),
       codemirror = CodeMirror(firepadContainer, {
         lineNumbers: true,
@@ -24,8 +24,8 @@ const logContainer = document.getElementById("honkpad-log"),
 var firepad,
     currentRoom = localStorage.getItem("currentRoom") || undefined;
 
-firepadContainer.style.flexGrow = localStorage.getItem("firepadContainer.style.flexGrow") || 1;
-logContainer.style.flexGrow = localStorage.getItem("logContainer.style.flexGrow") || 1;
+firepadContainer.style.width = localStorage.getItem("firepadContainer.style.width") || "50%";
+logContainer.style.width = localStorage.getItem("logContainer.style.width") || "50%";
 
 socket.on("compiler:begin", data => {
   clearLog();
@@ -85,9 +85,9 @@ resizeEl.addEventListener("mousedown", e => {
     if(mousedown){
       const screenMin = 40,
             screenMax = window.innerWidth,
-            flexGrow = (e.clientX - screenMin) / (screenMax - screenMin) * (resizeFlexMax - resizeFlexMin) + resizeFlexMin;
-      firepadContainer.style.flexGrow = flexGrow.toFixed(3);
-      logContainer.style.flexGrow = (resizeFlexMax - flexGrow).toFixed(3);
+            width = (e.clientX - screenMin) / (screenMax - screenMin) * (resizeWidthMax - resizeWidthMin) + resizeWidthMin;
+      firepadContainer.style.width = width.toFixed(3) + "%";
+      logContainer.style.width = (resizeWidthMax - width).toFixed(3) + "%";
     }
   }
 
@@ -96,8 +96,8 @@ resizeEl.addEventListener("mousedown", e => {
 });
 
 window.addEventListener("beforeunload", e => {
-  localStorage.setItem("firepadContainer.style.flexGrow", firepadContainer.style.flexGrow);
-  localStorage.setItem("logContainer.style.flexGrow", logContainer.style.flexGrow);
+  localStorage.setItem("firepadContainer.style.width", firepadContainer.style.width);
+  localStorage.setItem("logContainer.style.width", logContainer.style.width);
 
   localStorage.setItem("currentRoom", currentRoom);
 });
