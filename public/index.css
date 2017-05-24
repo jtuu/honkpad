@@ -7,16 +7,17 @@ body{
   height: 100%;
   position: relative;
   background: hsl(0, 0%, 12%);
+}
+
+#honkpad-main-wrap{
   display: flex;
   flex-direction: row;
+  height: 100%;
+  margin-left: 40px;
 }
 
 #firepad, #honkpad-log{
-  width: 50%;
-  height: 100%;
-}
-
-.CodeMirror{
+  flex-grow: 1;
   height: 100%;
 }
 
@@ -24,6 +25,20 @@ body{
   overflow-y: auto;
   box-sizing: border-box;
   padding: 5px;
+}
+
+#honkpad-log-resize{
+  height: 100%;
+  border-left: 5px double hsl(0, 0%, 50%);
+  cursor: col-resize;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+}
+
+.CodeMirror{
+  height: 100%;
 }
 
 .honkpad-log-line{
@@ -72,8 +87,7 @@ body{
 }
 
 #honkpad-button-container{
-  position: fixed;
-  left: calc(50% + 20px);
+  position: absolute;
   top: 0;
   transform: translateX(-100%);
   font-family: sans-serif;
@@ -113,8 +127,9 @@ body{
 #honkpad-roomlist-wrap{
   width: 40px;
   z-index: 5;
-  position: relative;
+  position: absolute;
   font-family: sans-serif;
+  height: 100%;
 }
 
 #honkpad-roomlist-title{

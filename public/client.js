@@ -6,7 +6,11 @@ const logContainer = document.getElementById("honkpad-log"),
       compileButton = document.getElementById("honkpad-compile"),
       runButton = document.getElementById("honkpad-run"),
       aboutButton = document.getElementById("honkpad-about"),
-      codemirror = CodeMirror(document.getElementById("firepad"), {
+      resizeEl = document.getElementById("honkpad-log-resize"),
+      resizeFlexMin = 0,
+      resizeFlexMax = 2,
+      firepadContainer = document.getElementById("firepad"),
+      codemirror = CodeMirror(firepadContainer, {
         lineNumbers: true,
         matchBrackets: true,
         autoCloseBrackets: true,
@@ -18,6 +22,8 @@ const logContainer = document.getElementById("honkpad-log"),
       socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
 
 var firepad, currentRoom;
+
+firepadContainer.style.flexGrow = logContainer.style.flexGrow = 1;
 
 socket.on("compiler:begin", data => {
   clearLog();
@@ -60,6 +66,31 @@ createRoomButton.addEventListener("click", e => {
 });
 aboutButton.addEventListener("click", e => {
   socket.emit("meta:about");
+});
+
+resizeEl.addEventListener("mousedown", e => {
+  var mousedown = true;
+  document.body.style.cursor = "col-resize";
+
+  function onmouseup(){
+    document.body.style.cursor = "";
+    mousedown = false;
+    window.removeEventListener("mousemove", onmousemove);
+    window.removeEventListener("mouseup", onmouseup);
+  }
+
+  function onmousemove(e){
+    if(mousedown){
+      const screenMin = 40,
+            screenMax = window.innerWidth,
+            flexGrow = (e.clientX - screenMin) / (screenMax - screenMin) * (resizeFlexMax - resizeFlexMin) + resizeFlexMin;
+      firepadContainer.style.flexGrow = flexGrow.toFixed(3);
+      logContainer.style.flexGrow = (resizeFlexMax - flexGrow).toFixed(3);
+    }
+  }
+
+  window.addEventListener("mouseup", onmouseup);
+  window.addEventListener("mousemove", onmousemove);
 });
 
 function log(text, style = "default"){
