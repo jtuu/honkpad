@@ -16,12 +16,12 @@ body{
 
 #honkpad-main-wrap.orientation-row{
   flex-direction: row;
-  height: 100%;
+  height: 97%;
 }
 
 #honkpad-main-wrap.orientation-column{
   flex-direction: column;
-  height: 100%;
+  height: 97%;
 }
 
 #honkpad-main-wrap.orientation-row > #firepad, #honkpad-main-wrap.orientation-row > #honkpad-log{
@@ -112,6 +112,7 @@ body{
   justify-content: space-between;
   border-bottom: 2px solid hsl(0, 0%, 40%);
   background: black;
+  height: 2.7%;
 }
 
 #honkpad-top-bar > *{
@@ -168,7 +169,7 @@ body{
   z-index: 5;
   position: absolute;
   font-family: sans-serif;
-  height: 100%;
+  height: 97%;
 }
 
 #honkpad-roomlist-title{
