@@ -42,7 +42,7 @@ body{
 
 .honkpad-log-line{
   white-space: pre-wrap;
-  font-family: monospace;
+  font-family: "DejaVu Sans Mono", monospace;
   line-height: 1em;
 }
 
@@ -93,6 +93,7 @@ body{
   color: white;
   cursor: pointer;
   z-index: 6;
+  overflow-y: auto;
 }
 
 .honkpad-button{
@@ -140,6 +141,7 @@ body{
   transition: transform 0.5s;
   top: 0;
   pointer-events: none;
+  text-shadow: 1px 1px 0 black;
 }
 
 #honkpad-roomlist-container{
@@ -201,6 +203,7 @@ body{
 #honkpad-roomlist-createbutton{
   margin-top: 10px;
   margin-left: 10px;
+  margin-bottom: 20px;
   color: black;
   background: hsl(0, 0%, 85%);
   cursor: pointer;
