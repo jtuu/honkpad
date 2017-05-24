@@ -20,19 +20,24 @@ const fs = require("fs"),
       app = express(),
       socketio = require("socket.io"),
       firebaseConfig = require("./public/firebase-config.json"),
-      firebase = require("firebase"),
+      firebaseCredentials = require("./firebase-credentials.json"),
+      firebase = require("firebase-admin"),
       firepad = require("firepad"),
       distroName = "ubuntu",
       compilerName = "g++",
       compilerOptions = ["-std=c++11", "-Wall"],
       dockerWorkDir = path.resolve(__dirname + "/docker"),
+      disallowedCharsRe = /[^A-Za-z0-9_-]/g,
       OK = 0,
       roomlist = new DefaultMap(0),
       firepadClients = new Map();
 var io;
 
 app.use(express.static(__dirname + "/public"));
-firebase.initializeApp({databaseURL: firebaseConfig.databaseURL});
+firebase.initializeApp({
+  credential: firebase.credential.cert(firebaseCredentials),
+  databaseURL: firebaseConfig.databaseURL
+});
 
 function getSourceFile(roomname){
   return new Promise((resolve, reject) => {
@@ -160,6 +165,7 @@ function modifyUserCount(roomname, val){
 }
 
 module.exports = function init(server){
+
   if(!io){
     io = socketio(server, {path: "/honkpad/socket.io"});
     io.on("connect", socket => {
@@ -167,7 +173,7 @@ module.exports = function init(server){
 
       socket.on("meta:join", roomToJoin => {
         if(typeof roomToJoin === "string"){
-          const newRoomname = roomToJoin.replace(/[^A-z0-9]/g, "");
+          const newRoomname = roomToJoin.replace(disallowedCharsRe, "");
           if(newRoomname){
             if(roomname){
               socket.leave(roomname);
