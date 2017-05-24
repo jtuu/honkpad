@@ -19,6 +19,7 @@ const logContainer = document.getElementById("honkpad-log"),
       }),
       decoder = new TextDecoder(),
       newline = /\r\n|\n/,
+      disallowedCharsRe = /[^A-Za-z0-9_-]/g,
       socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
 
 var firepad,
@@ -152,10 +153,23 @@ const getFirebaseConfig = (() => {
   }
 })();
 
+function firebaseAuth(){
+  return new Promise((resolve, reject) => {
+    firebase.auth().onAuthStateChanged(user => {
+      if(user){
+        resolve(user);
+      }else{
+        firebase.auth().signInAnonymously().catch(reject);
+      }
+    })
+  });
+}
+
 getFirebaseConfig().then(config => {
   firebase.initializeApp(config);
+  return firebaseAuth();
+}).then(() => {
   joinRoom(currentRoom);
-
   const ref = firebase.database().ref().orderByKey();
   ref.on("child_added", (data) => {
     const roomname = data.getKey();
@@ -198,7 +212,7 @@ getFirebaseConfig().then(config => {
       roomlistContainer.removeChild(roomEl);
     }
   });
-});
+}).catch(err => console.error(err));
 
 function leaveRoom(){
   const roomEl = document.getElementById("honkpad-roomlist-item-" + currentRoom);
@@ -215,7 +229,7 @@ function leaveRoom(){
 
 function joinRoom(roomname = "default"){
   if(typeof roomname === "string"){
-    roomname = roomname.replace(/[^A-z0-9]/g, "");
+    roomname = roomname.replace(disallowedCharsRe, "");
     if(roomname){
       leaveRoom();
       currentRoom = roomname;
@@ -229,7 +243,7 @@ function joinRoom(roomname = "default"){
 
       const firebaseRef = firebase.database().ref(roomname);
       firepad = Firepad.fromCodeMirror(firebaseRef, codemirror, {
-        defaultText: '#include <iostream>\nusing namespace std;\n\nint main(){\n\tcout << "Hello World!";\n}'
+        defaultText: '#include <iostream>\nusing namespace std;\n\nint main(){\n  cout << "Hello World!";\n}'
       });
     }
   }
@@ -237,7 +251,7 @@ function joinRoom(roomname = "default"){
 
 function deleteRoom(roomname){
   if(typeof roomname === "string"){
-    roomname = roomname.replace(/[^A-z0-9]/g, "");
+    roomname = roomname.replace(disallowedCharsRe, "");
     if(roomname){
       if(roomname === currentRoom) joinRoom();
 
