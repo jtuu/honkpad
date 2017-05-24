@@ -239,6 +239,8 @@ function joinRoom(roomname = "default"){
         roomEl.classList.add("honkpad-roomlist-item-active");
       }
 
+      document.title = currentRoom + " | Honkpad";
+
       socket.emit("meta:join", roomname);
 
       const firebaseRef = firebase.database().ref(roomname);
