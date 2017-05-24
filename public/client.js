@@ -6,9 +6,10 @@ const logContainer = document.getElementById("honkpad-log"),
       compileButton = document.getElementById("honkpad-compile"),
       runButton = document.getElementById("honkpad-run"),
       aboutButton = document.getElementById("honkpad-about"),
+      orientationButton = document.getElementById("honkpad-orientation"),
       resizeEl = document.getElementById("honkpad-log-resize"),
-      resizeWidthMin = 0,
-      resizeWidthMax = 100,
+      resizeMin = 0,
+      resizeMax = 100,
       firepadContainer = document.getElementById("firepad"),
       codemirror = CodeMirror(firepadContainer, {
         lineNumbers: true,
@@ -17,16 +18,24 @@ const logContainer = document.getElementById("honkpad-log"),
         mode: "text/x-c++src",
         lineWrapping: true
       }),
+      honkpadContainer = document.getElementById("honkpad-main-wrap"),
       decoder = new TextDecoder(),
       newline = /\r\n|\n/,
       disallowedCharsRe = /[^A-Za-z0-9_-]/g,
       socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
 
 var firepad,
-    currentRoom = localStorage.getItem("currentRoom") || undefined;
+    currentRoom = localStorage.getItem("currentRoom") || undefined,
+    currentOrientation = "row";
 
-firepadContainer.style.width = localStorage.getItem("firepadContainer.style.width") || "50%";
-logContainer.style.width = localStorage.getItem("logContainer.style.width") || "50%";
+if(localStorage.getItem("currentOrientation") === "row"){
+  firepadContainer.style.width = localStorage.getItem("firepadContainer.style.width") || "50%";
+  logContainer.style.width = localStorage.getItem("logContainer.style.width") || "50%";
+}else{
+  toggleOrientation();
+  firepadContainer.style.height = localStorage.getItem("firepadContainer.style.height") || "50%";
+  logContainer.style.height = localStorage.getItem("logContainer.style.height") || "50%";
+}
 
 socket.on("compiler:begin", data => {
   clearLog();
@@ -70,25 +79,36 @@ createRoomButton.addEventListener("click", e => {
 aboutButton.addEventListener("click", e => {
   socket.emit("meta:about");
 });
+orientationButton.addEventListener("click", e => {
+  toggleOrientation();
+});
 
 resizeEl.addEventListener("mousedown", e => {
-  var mousedown = true;
-  document.body.style.cursor = "col-resize";
+  var isMouseDown = true;
+  document.body.style.cursor = currentOrientation === "row" ? "col-resize" : "row-resize";
 
   function onmouseup(){
     document.body.style.cursor = "";
-    mousedown = false;
+    isMouseDown = false;
     window.removeEventListener("mousemove", onmousemove);
     window.removeEventListener("mouseup", onmouseup);
   }
 
   function onmousemove(e){
-    if(mousedown){
-      const screenMin = 40,
-            screenMax = window.innerWidth,
-            width = (e.clientX - screenMin) / (screenMax - screenMin) * (resizeWidthMax - resizeWidthMin) + resizeWidthMin;
-      firepadContainer.style.width = width.toFixed(3) + "%";
-      logContainer.style.width = (resizeWidthMax - width).toFixed(3) + "%";
+    if(isMouseDown){
+      if(currentOrientation === "row"){
+        const screenMin = 40,
+              screenMax = document.body.offsetWidth,
+              width = (e.clientX - screenMin) / (screenMax - screenMin) * (resizeMax - resizeMin) + resizeMin;
+        firepadContainer.style.width = width.toFixed(3) + "%";
+        logContainer.style.width = (resizeMax - width).toFixed(3) + "%";
+      }else{
+        const screenMin = 0,
+              screenMax = document.body.offsetHeight,
+              height = (e.clientY - screenMin) / (screenMax - screenMin) * (resizeMax - resizeMin) + resizeMin;
+        firepadContainer.style.height = height.toFixed(3) + "%";
+        logContainer.style.height = (resizeMax - height).toFixed(3) + "%";
+      }
     }
   }
 
@@ -97,8 +117,14 @@ resizeEl.addEventListener("mousedown", e => {
 });
 
 window.addEventListener("beforeunload", e => {
-  localStorage.setItem("firepadContainer.style.width", firepadContainer.style.width);
-  localStorage.setItem("logContainer.style.width", logContainer.style.width);
+  localStorage.setItem("currentOrientation", currentOrientation);
+  if(currentOrientation === "row"){
+    localStorage.setItem("firepadContainer.style.width", firepadContainer.style.width);
+    localStorage.setItem("logContainer.style.width", logContainer.style.width);
+  }else{
+    localStorage.setItem("firepadContainer.style.height", firepadContainer.style.height);
+    localStorage.setItem("logContainer.style.height", logContainer.style.height);
+  }
 
   localStorage.setItem("currentRoom", currentRoom);
 });
@@ -264,5 +290,24 @@ function deleteRoom(roomname){
 
       firebase.database().ref().child(roomname).remove();
     }
+  }
+}
+
+function toggleOrientation(){
+  honkpadContainer.classList.toggle("orientation-row");
+  honkpadContainer.classList.toggle("orientation-column");
+
+  if(currentOrientation === "row"){
+    firepadContainer.style.height = firepadContainer.style.width;
+    logContainer.style.height = logContainer.style.width;
+    firepadContainer.style.width = "";
+    logContainer.style.width = "";
+    currentOrientation = "column";
+  }else{
+    firepadContainer.style.width = firepadContainer.style.height;
+    logContainer.style.width = logContainer.style.height;
+    firepadContainer.style.height = "";
+    logContainer.style.height = "";
+    currentOrientation = "row";
   }
 }

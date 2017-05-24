@@ -18,20 +18,24 @@
     <link rel="stylesheet" href="index.css"/>
   </head>
   <body>
+    <div id="honkpad-top-bar">
+      <div id="honkpad-top-bar-align-start">
+        <div id="honkpad-compile" class="honkpad-button">Compile</div>
+        <div id="honkpad-run" class="honkpad-button">Run</div>
+      </div>
+      <div id="honkpad-top-bar-align-end">
+        <div id="honkpad-orientation" class="honkpad-button" title="Toggle orientation">🔁</div>
+      </div>
+    </div>
     <div id="honkpad-roomlist-wrap">
       <div id="honkpad-roomlist-container">
         <div id="honkpad-roomlist-createbutton" title="Create a new room">+New</div>
       </div>
       <div id="honkpad-roomlist-title">ROOMLIST</div>
     </div>
-    <div id="honkpad-main-wrap">
+    <div id="honkpad-main-wrap" class="orientation-row">
       <div id="firepad"></div>
-      <div id="honkpad-log-resize">
-        <div id="honkpad-button-container">
-          <div id="honkpad-compile" class="honkpad-button">Compile</div>
-          <div id="honkpad-run" class="honkpad-button">Run</div>
-        </div>
-      </div>
+      <div id="honkpad-log-resize"></div>
       <div id="honkpad-log"></div>
     </div>
     <div id="honkpad-about">?</div>

@@ -11,13 +11,25 @@ body{
 
 #honkpad-main-wrap{
   display: flex;
-  flex-direction: row;
-  height: 100%;
   margin-left: 40px;
 }
 
-#firepad, #honkpad-log{
+#honkpad-main-wrap.orientation-row{
+  flex-direction: row;
   height: 100%;
+}
+
+#honkpad-main-wrap.orientation-column{
+  flex-direction: column;
+  height: 100%;
+}
+
+#honkpad-main-wrap.orientation-row > #firepad, #honkpad-main-wrap.orientation-row > #honkpad-log{
+  height: 100%;
+}
+
+#honkpad-main-wrap.orientation-column > #firepad, #honkpad-main-wrap.orientation-column > #honkpad-log{
+  width: 100%;
 }
 
 #honkpad-log{
@@ -27,13 +39,22 @@ body{
 }
 
 #honkpad-log-resize{
-  height: 100%;
-  border-left: 5px double hsl(0, 0%, 50%);
-  cursor: col-resize;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
   position: relative;
+}
+
+#honkpad-main-wrap.orientation-row > #honkpad-log-resize{
+  height: 100%;
+  border-left: 5px double hsl(0, 0%, 50%);
+  cursor: col-resize;
+}
+
+#honkpad-main-wrap.orientation-column > #honkpad-log-resize{
+  width: 100%;
+  border-top: 5px double hsl(0, 0%, 50%);
+  cursor: row-resize;
 }
 
 .CodeMirror{
@@ -85,19 +106,24 @@ body{
   color: hsl(222, 100%, 59%);
 }
 
-#honkpad-button-container{
-  position: absolute;
-  top: 0;
-  transform: translateX(-100%);
-  font-family: sans-serif;
-  color: white;
-  cursor: pointer;
-  z-index: 6;
-  overflow-y: auto;
+#honkpad-top-bar{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 2px solid hsl(0, 0%, 40%);
+  background: black;
+}
+
+#honkpad-top-bar > *{
+  display: flex;
+  flex-direction: row;
 }
 
 .honkpad-button{
   padding: 5px;
+  color: white;
+  cursor: pointer;
+  font-family: sans-serif;
 }
 
 #honkpad-compile{
@@ -123,6 +149,19 @@ body{
 #honkpad-run:active{
   background: hsl(120, 50%, 55%);
 }
+
+#honkpad-orientation{
+  background: hsl(0, 0%, 5%);
+}
+
+#honkpad-orientation:hover{
+  background: hsl(0, 0%, 15%);
+}
+
+#honkpad-orientation:active{
+  background: hsl(0, 0%, 12%);
+}
+
 
 #honkpad-roomlist-wrap{
   width: 40px;
