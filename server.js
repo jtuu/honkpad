@@ -122,11 +122,11 @@ function executeInContainer(filename){
   proc.stderr.setEncoding("utf8");
 
   var isAlive = true;
-  proc.on("exit", isAlive = false);
+  proc.on("exit", () => isAlive = false);
   setTimeout(() => {
     if(isAlive) proc.kill();
   }, 30 * 1000);
-  
+
   return proc;
 }
 
