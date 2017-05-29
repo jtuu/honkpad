@@ -117,10 +117,16 @@ function executeInContainer(filename){
         proc = child_process.spawn("docker", options, {
           cwd: dockerWorkDir,
           detached: true,
-          stdio: ["ignore", "pipe", "pipe"],
-          timeout: 30 * 1000
+          stdio: ["ignore", "pipe", "pipe"]
         });
   proc.stderr.setEncoding("utf8");
+
+  var isAlive = true;
+  proc.on("exit", isAlive = false);
+  setTimeout(() => {
+    if(isAlive) proc.kill();
+  }, 30 * 1000);
+  
   return proc;
 }
 
