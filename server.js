@@ -125,6 +125,7 @@ function executeInContainer(filename){
   proc.on("exit", () => isAlive = false);
   setTimeout(() => {
     if(isAlive) proc.kill();
+    child_process.spawn("docker", ["kill", distroName]);
   }, 30 * 1000);
 
   return proc;
