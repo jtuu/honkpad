@@ -27,7 +27,7 @@ const fs = require("fs"),
       compilerName = "g++",
       compilerOptions = ["-std=c++11", "-Wall"],
       dockerWorkDir = path.resolve(__dirname + "/docker"),
-      disallowedCharsRe = /[^A-Za-z0-9_-]/g,
+      disallowedCharsRe = /[^A-Za-z0-9_]/g,
       OK = 0,
       roomlist = new DefaultMap(0),
       firepadClients = new Map();

@@ -21,7 +21,7 @@ const logContainer = document.getElementById("honkpad-log"),
       honkpadContainer = document.getElementById("honkpad-main-wrap"),
       decoder = new TextDecoder(),
       newline = /\r\n|\n/,
-      disallowedCharsRe = /[^A-Za-z0-9_-]/g,
+      disallowedCharsRe = /[^A-Za-z0-9_]/g,
       socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
 
 var firepad,
