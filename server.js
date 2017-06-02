@@ -113,48 +113,60 @@ function onCompileRequest(roomname){
 }
 
 function executeInContainer(filename){
-  const options = ["run", "--name=" + distroName, `--volume=${dockerWorkDir}/${filename}:/${filename}`, "--rm=true", "--tty=true", distroName, "/" + filename],
-        proc = child_process.spawn("docker", options, {
-          cwd: dockerWorkDir,
-          detached: true,
-          stdio: ["ignore", "pipe", "pipe"]
-        });
-  proc.stderr.setEncoding("utf8");
+  const filepath = dockerWorkDir + "/" + filename;
+  return new Promise((resolve, reject) => {
+    fs.exists(filepath, exists => {
+      if(exists){
+        const options = ["run", "--name=" + distroName, `--volume=${filepath}:/${filename}`, "--rm=true", "--tty=true", distroName, "/" + filename],
+              proc = child_process.spawn("docker", options, {
+                cwd: dockerWorkDir,
+                detached: true,
+                stdio: ["ignore", "pipe", "pipe"]
+              });
+        proc.stderr.setEncoding("utf8");
 
-  var isAlive = true;
-  proc.on("exit", () => isAlive = false);
-  setTimeout(() => {
-    if(isAlive) proc.kill();
-    child_process.spawn("docker", ["kill", distroName]).on("exit", () => {
-      child_process.spawn("docker", ["rm", distroName]);
+        var isAlive = true;
+        proc.on("exit", () => isAlive = false);
+        setTimeout(() => {
+          if(isAlive) proc.kill();
+          child_process.spawn("docker", ["kill", distroName]).on("exit", () => {
+            child_process.spawn("docker", ["rm", distroName]);
+          });
+
+        }, 30 * 1000);
+
+        resolve(proc);
+      }else{
+        reject("File does not exist: " + filepath);
+      }
     });
-
-  }, 30 * 1000);
-
-  return proc;
+  });
 }
 
 function onExecuteRequest(roomname){
-  const proc = executeInContainer(roomname);
-  proc.unref();
+  executeInContainer(roomname).then(proc => {
+    proc.unref();
 
-  io.to(roomname).emit("exec:begin");
-  proc.stdout.on("data", data => {
-    io.to(roomname).emit("exec:out", data);
-  });
-  proc.stderr.on("data", data => {
-    io.to(roomname).emit("exec:error", data);
-  });
-  proc.on("error", err => {
+    io.to(roomname).emit("exec:begin");
+    proc.stdout.on("data", data => {
+      io.to(roomname).emit("exec:out", data);
+    });
+    proc.stderr.on("data", data => {
+      io.to(roomname).emit("exec:error", data);
+    });
+    proc.on("error", err => {
+      console.error(err);
+      io.to(roomname).emit("exec:fail");
+    });
+    proc.on("close", code => {
+      if(code === OK){
+        io.to(roomname).emit("exec:success");
+      }else{
+        io.to(roomname).emit("exec:fail", code);
+      }
+    });
+  }).catch(err => {
     console.error(err);
-    io.to(roomname).emit("exec:fail");
-  });
-  proc.on("close", code => {
-    if(code === OK){
-      io.to(roomname).emit("exec:success");
-    }else{
-      io.to(roomname).emit("exec:fail", code);
-    }
   });
 }
 
