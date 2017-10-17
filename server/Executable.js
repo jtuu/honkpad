@@ -29,15 +29,15 @@ const ExecutableMixin = Base => class Executable extends Base{
     this.timeoutId = setTimeout(this.kill, this.timeout);
   }
 
-  setFileExecutable(filename){
+  setExecutablePermissions(filename){
     const filepath = `${this.workDir}/${filename}`;
     return new Promise((resolve, reject) => {
-      fs.chmod(filepath, 100, err => err ? reject(err) : resolve());
+      fs.chmod(filepath, parseInt(700, 8), err => err ? reject(err) : resolve());
     });
   }
 
   async execute(filename){
-    await this.setFileExecutable(filename);
+    await this.setExecutablePermissions(filename);
     const dockerName = uuid();
     const proc = spawn(
       "docker",

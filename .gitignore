@@ -40,5 +40,5 @@ jspm_packages
 
 public/firebase-config.json
 server/firebase-credentials.json
-server/docker/*
-!server/docker/.gitkeep
+server/roomfiles/*
+!server/roomfiles/.gitkeep
