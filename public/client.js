@@ -8,6 +8,7 @@ const logContainer = document.getElementById("honkpad-log"),
       aboutButton = document.getElementById("honkpad-about"),
       orientationButton = document.getElementById("honkpad-orientation"),
       resizeEl = document.getElementById("honkpad-log-resize"),
+      notificationContainer = document.getElementById("notifications"),
       resizeMin = 0,
       resizeMax = 100,
       firepadContainer = document.getElementById("firepad"),
@@ -22,7 +23,97 @@ const logContainer = document.getElementById("honkpad-log"),
       decoder = new TextDecoder(),
       newline = /\r\n|\n/,
       disallowedCharsRe = /[^A-Za-z0-9_]/g,
-      socket = io.connect(location.origin, {path: "/honkpad/socket.io"});
+      socket = io.connect(location.origin, {path: "/honkpad/socket.io"}),
+      languages = {
+        "C++": {
+          name: "C++",
+          codemirrorMode: "text/x-c++src"
+        }
+      },
+      defaultLang = "C++";
+
+class Notification{
+  constructor(text){
+    this.text = text;
+
+    // base element
+    this.el = document.createElement("div");
+    this.el.classList.add("notification");
+
+    // button in the corner that will close the notif
+    // all types have this
+    const closeButton = this.el.appendChild(document.createElement("div"));
+    closeButton.textContent = "✖";
+    closeButton.classList.add("close");
+    closeButton.addEventListener("click", e => {
+      this.hide();
+    });
+
+    const textEl = this.el.insertBefore(document.createElement("div"), this.el.firstChild);
+    textEl.textContent = this.text;
+    textEl.classList.add("text");
+  }
+
+  hide(){
+    const remove = () => {
+      notificationContainer.removeChild(this.el);
+      this.el.removeEventListener("animationend", remove);
+      this.el.classList.remove("hide");
+    }
+    this.el.addEventListener("animationend", remove);
+    this.el.classList.add("hide");
+  }
+
+  show(timeout = 5000){
+    notificationContainer.appendChild(this.el);
+    if(timeout !== Infinity) setTimeout(() => this.hide(), timeout);
+  }
+}
+
+class RoomCreationPopup extends Notification{
+  constructor(callbacks){
+    super("New Room");
+
+    this.id = ++RoomCreationPopup.idCounter;
+
+    this.nameInputGroup = this.el.appendChild(document.createElement("fieldset"));
+    this.nameInputLabel = this.nameInputGroup.appendChild(document.createElement("div"));
+    this.nameInputLabel.textContent = "Room name:";
+    this.nameInput = this.nameInputGroup.appendChild(document.createElement("input"));
+    this.nameInput.placeholder = "MyRoom";
+
+    this.languageInputGroup = this.el.appendChild(document.createElement("fieldset"));
+    this.languageInputLabel = this.languageInputGroup.appendChild(document.createElement("div"));
+    this.languageInputLabel.textContent = "Room language:";
+    for(let i = 0, keys = Object.keys(languages), languageName = keys[i]; i < keys.length; i++, languageName = keys[i]){
+      const languageRadioButton = this.languageInputGroup.appendChild(document.createElement("input"));
+      languageRadioButton.type = "radio";
+      languageRadioButton.name = "language";
+      languageRadioButton.value = languageName;
+      languageRadioButton.id = `notif-${this.id}-lang-${i}`;
+      if(i == 0) languageRadioButton.checked = true;
+
+      const languageRadioLabel = this.languageInputGroup.appendChild(document.createElement("label"));
+      languageRadioLabel.for = languageRadioButton.id;
+      languageRadioLabel.textContent = languageName;
+    }
+
+    this.okButton = this.el.appendChild(document.createElement("div"));
+    this.okButton.classList.add("honkpad-button");
+    this.okButton.textContent = "OK";
+    if(callbacks.onOkClick){
+      this.okButton.addEventListener("click", e => callbacks.onOkClick(this, e));
+    }
+  }
+
+  get formValues(){
+    return {
+      roomName: this.nameInput.value,
+      languageName: this.languageInputGroup.elements.language.value
+    };
+  }
+}
+RoomCreationPopup.idCounter = 0;
 
 var firepad,
     currentRoom = localStorage.getItem("currentRoom") || undefined,
@@ -54,10 +145,15 @@ socket.on("exec:out", data => {
   }
 });
 socket.on("exec:error", data => log(data || "There was an error.", "warning"));
-socket.on("exec:fail", data => log("Exited with code: " + data, "error"));
-socket.on("exec:success", data => log(data || "Finished running successfully.", "success"));
+socket.on("exec:fail", data => log("Exited with an error.", "error"));
+socket.on("exec:success", data => log(data || "Exited.", "success"));
+socket.on("exec:timeout", () => log("Timed out.", "error"));
 
-socket.on("meta:about", data => log(data));
+socket.on("meta:about", data => {
+  for(const line of data.split(newline)){
+    if(line) log(line);
+  }
+});
 
 socket.on("disconnect", () => {
   leaveRoom();
@@ -74,7 +170,15 @@ runButton.addEventListener("click", e => {
   socket.emit("exec:execute");
 });
 createRoomButton.addEventListener("click", e => {
-  joinRoom(prompt("What should the name of the new room be? Name must be alphanumeric."));
+  (new RoomCreationPopup({
+    onOkClick: (notif, e) => {
+      const {roomName, languageName} = notif.formValues;
+      if(roomName && languageName){
+        notif.hide();
+        joinRoom(roomName, languageName);
+      }
+    }
+  })).show(Infinity);
 });
 aboutButton.addEventListener("click", e => {
   socket.emit("meta:about");
@@ -200,6 +304,7 @@ getFirebaseConfig().then(config => {
   const ref = firebase.database().ref().orderByKey();
   ref.on("child_added", (data) => {
     const roomname = data.getKey();
+    const languageName = data.child("language").val() || defaultLang;
     if(roomlist.size < roomlist.add(roomname).size){
       const roomEl = document.createElement("div");
       const roomText = document.createElement("div");
@@ -209,7 +314,7 @@ getFirebaseConfig().then(config => {
       roomText.textContent = roomname;
       roomText.title = "Join room";
       roomText.addEventListener("click", e => {
-        joinRoom(roomname);
+        joinRoom(roomname, languageName);
       });
 
       if(roomname === currentRoom){
@@ -254,8 +359,8 @@ function leaveRoom(){
   codemirror.clearHistory();
 }
 
-function joinRoom(roomname = "default"){
-  if(typeof roomname === "string"){
+function joinRoom(roomname = "default", languageName = defaultLang){
+  if(typeof roomname === "string" && languageName in languages){
     roomname = roomname.replace(disallowedCharsRe, "");
     if(roomname){
       leaveRoom();
@@ -268,12 +373,14 @@ function joinRoom(roomname = "default"){
 
       document.title = currentRoom + " | Honkpad";
 
-      socket.emit("meta:join", roomname);
+      socket.emit("meta:join", {roomname, languageName});
 
       const firebaseRef = firebase.database().ref(roomname);
+      firebaseRef.child("language").set(languageName);
       firepad = Firepad.fromCodeMirror(firebaseRef, codemirror, {
-        defaultText: '#include <iostream>\nusing namespace std;\n\nint main(){\n  cout << "Hello World!";\n}'
+        //defaultText: '#include <iostream>\nusing namespace std;\n\nint main(){\n  cout << "Hello World!";\n}'
       });
+      codemirror.setOption("mode", languages[languageName].codemirrorMode);
     }
   }
 }
