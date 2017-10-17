@@ -15,13 +15,13 @@ module.exports = class CPPLang extends CompiledLanguage{
   async getInfo(){
     const compilerVersion = (await exec(`${this.compilerName} --version`)).split("\n")[0];
     const compilerOpts = this.getCompilerOptions("filename." + this.fileExtension).slice(0, -1);
-    const dockerInfo = JSON.parse(await exec(`docker inspect ${this.dockerImageName}`))[0];
-    const runtimeInfo = `${this.dockerImageName.charAt(0).toUpperCase() + this.dockerImageName.slice(1)} ${dockerInfo.DockerVersion} (${dockerInfo.Architecture})`;
+    const {DockerVersion, Architecture} = JSON.parse(await exec(`docker inspect ${this.dockerImageName}`))[0];
+    const containerInfo = `${this.dockerImageName.charAt(0).toUpperCase() + this.dockerImageName.slice(1)} ${DockerVersion} (${Architecture})`;
 
     return `` +
       `Language: ${this.name}\n` +
       `Compiler: ${compilerVersion} using flags ${compilerOpts}\n` +
-      `Running in ${runtimeInfo}`;
+      `Running in ${containerInfo}`;
   }
 
   static get name(){

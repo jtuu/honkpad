@@ -28,6 +28,10 @@ const logContainer = document.getElementById("honkpad-log"),
         "C++": {
           name: "C++",
           codemirrorMode: "text/x-c++src"
+        },
+        "JavaScript": {
+          name: "JavaScript",
+          codemirrorMode: "text/javascript"
         }
       },
       defaultLang = "C++";
@@ -109,7 +113,7 @@ class RoomCreationPopup extends Notification{
   get formValues(){
     return {
       roomName: this.nameInput.value,
-      languageName: this.languageInputGroup.elements.language.value
+      languageName: this.languageInputGroup.querySelector(`input[name="language"]:checked`).value
     };
   }
 }
@@ -117,6 +121,7 @@ RoomCreationPopup.idCounter = 0;
 
 var firepad,
     currentRoom = localStorage.getItem("currentRoom") || undefined,
+    currentLang = localStorage.getItem("currentLang") || undefined,
     currentOrientation = "row";
 
 if(localStorage.getItem("currentOrientation") === "row"){
@@ -173,6 +178,7 @@ createRoomButton.addEventListener("click", e => {
   (new RoomCreationPopup({
     onOkClick: (notif, e) => {
       const {roomName, languageName} = notif.formValues;
+      console.log(notif.formValues)
       if(roomName && languageName){
         notif.hide();
         joinRoom(roomName, languageName);
@@ -232,6 +238,7 @@ window.addEventListener("beforeunload", e => {
   }
 
   localStorage.setItem("currentRoom", currentRoom);
+  localStorage.setItem("currentLang", currentLang);
 });
 
 function log(text, style = "default"){
@@ -300,7 +307,7 @@ getFirebaseConfig().then(config => {
   firebase.initializeApp(config);
   return firebaseAuth();
 }).then(() => {
-  joinRoom(currentRoom);
+  joinRoom(currentRoom, currentLang);
   const ref = firebase.database().ref().orderByKey();
   ref.on("child_added", (data) => {
     const roomname = data.getKey();
@@ -365,6 +372,7 @@ function joinRoom(roomname = "default", languageName = defaultLang){
     if(roomname){
       leaveRoom();
       currentRoom = roomname;
+      currentLang = languageName;
 
       const roomEl = document.getElementById("honkpad-roomlist-item-" + currentRoom);
       if(roomEl){
@@ -377,10 +385,8 @@ function joinRoom(roomname = "default", languageName = defaultLang){
 
       const firebaseRef = firebase.database().ref(roomname);
       firebaseRef.child("language").set(languageName);
-      firepad = Firepad.fromCodeMirror(firebaseRef, codemirror, {
-        //defaultText: '#include <iostream>\nusing namespace std;\n\nint main(){\n  cout << "Hello World!";\n}'
-      });
       codemirror.setOption("mode", languages[languageName].codemirrorMode);
+      firepad = Firepad.fromCodeMirror(firebaseRef, codemirror);
     }
   }
 }

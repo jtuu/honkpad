@@ -11,7 +11,7 @@ module.exports = class Language{
     return "";
   }
 
-  getInfo(){
+  async getInfo(){
     return this.name;
   }
 }

@@ -79,6 +79,11 @@ module.exports = class Room{
 
   async execute(){
     if(this.language.executable){
+      if(!this.language.compilable){
+        const sourceCode = await this.getSourceFile();
+        await this.saveSourceFile(sourceCode);
+      }
+      
       if(await this.executableExists()){
 
         this.language.runtime.on("start", () => this.broadcast("exec:begin"));
