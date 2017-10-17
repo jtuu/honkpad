@@ -4,7 +4,7 @@ const exec = require("./exec");
 
 module.exports = class CPPLang extends CompiledLanguage{
   constructor(){
-    super("g++", "", "ubuntu", CPPLang.name, "cpp");
+    super("g++", "", "honkpad-ubuntu", CPPLang.name, "cpp");
   }
 
   getCompilerOptions(filename){

@@ -2,6 +2,8 @@ const {spawn} = require("child_process");
 const fs = require("fs");
 const EventEmitter = require("events");
 const uuid = require("uuid");
+const honkpadDockerUser = 1001;
+const urx_grx = parseInt(550, 8);
 
 const ExecutableMixin = Base => class Executable extends Base{
   constructor(runtimeName, dockerImageName, ...args){
@@ -32,12 +34,12 @@ const ExecutableMixin = Base => class Executable extends Base{
   setExecutablePermissions(filename){
     const filepath = `${this.workDir}/${filename}`;
     return new Promise((resolve, reject) => {
-      fs.chmod(filepath, parseInt(700, 8), err => err ? reject(err) : resolve());
+      fs.chmod(filepath, urx_grx, err => err ? resolve(false) : fs.chown(filepath, process.getuid(), honkpadDockerUser, err => err ? resolve(false) : resolve(true)));
     });
   }
 
   async execute(filename){
-    await this.setExecutablePermissions(filename);
+    if(!await this.setExecutablePermissions(filename)) return console.error(new Error("Failed to set permissions"));
     const dockerName = uuid();
     const proc = spawn(
       "docker",
@@ -93,7 +95,6 @@ const ExecutableMixin = Base => class Executable extends Base{
       "--tty=true",
       `--name=${containerName}`,
       this.dockerImageName,
-      this.runtimeName,
       `/tmp/${filename}`
     ].filter(Boolean);
   }

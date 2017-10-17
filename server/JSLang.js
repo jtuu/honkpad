@@ -3,7 +3,7 @@ const exec = require("./exec");
 
 module.exports = class JSLang extends InterpretedLanguage{
   constructor(){
-    super("node", "ubuntu", JSLang.name, "js");
+    super("node", "honkpad-ubuntu", JSLang.name, "js");
   }
 
   async getInfo(){

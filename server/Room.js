@@ -25,6 +25,13 @@ module.exports = class Room{
     }
   }
 
+  deleteExecutable(){
+    const filepath = `${this.language.workDir}/${this.executableFileName}`;
+    return new Promise((resolve, reject) => {
+      fs.unlink(filepath, err => err ? resolve(false) : resolve(true));
+    });
+  }
+
   executableExists(){
     const filepath = `${this.language.workDir}/${this.executableFileName}`;
     return new Promise((resolve, reject) => {
@@ -35,10 +42,7 @@ module.exports = class Room{
   saveSourceFile(fileContents){
     const filepath = `${this.language.workDir}/${this.sourceFileName}`;
     return new Promise((resolve, reject) => {
-      fs.writeFile(path.resolve(filepath), fileContents, err => {
-        if(err) reject(err);
-        resolve(filepath);
-      });
+      fs.writeFile(path.resolve(filepath), fileContents, err => err ? resolve(false) : resolve(true));
     });
   }
 
@@ -50,6 +54,10 @@ module.exports = class Room{
     return new Promise(resolve => this.firepadClient.setText(this.language.constructor.defaultSourceCode));
   }
 
+  addShebang(sourceCode){
+    return `#!/usr/bin/${this.language.runtimeName}\n${sourceCode}`;
+  }
+
   // broadcast to everyone in this room through websocket
   broadcast(topic, msg){
     this.socketServer.to(this.name).emit(topic, msg);
@@ -57,8 +65,9 @@ module.exports = class Room{
 
   async compile(){
     if(this.language.compilable){
+      await this.deleteExecutable();
       const sourceCode = await this.getSourceFile();
-      await this.saveSourceFile(sourceCode);
+      if(!await this.saveSourceFile(sourceCode)) return console.error(new Error("Failed to save file"));
 
       this.language.compiler.on("start", () => this.broadcast("compiler:begin"));
       this.language.compiler.on("output", data => this.broadcast("compiler:out", data));
@@ -80,10 +89,11 @@ module.exports = class Room{
   async execute(){
     if(this.language.executable){
       if(!this.language.compilable){
-        const sourceCode = await this.getSourceFile();
-        await this.saveSourceFile(sourceCode);
+        await this.deleteExecutable();
+        const sourceCode = this.addShebang(await this.getSourceFile());
+        if(!await this.saveSourceFile(sourceCode)) return console.error(new Error("Failed to save file"));
       }
-      
+
       if(await this.executableExists()){
 
         this.language.runtime.on("start", () => this.broadcast("exec:begin"));
