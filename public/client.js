@@ -5,6 +5,7 @@ const logContainer = document.getElementById("honkpad-log"),
       createRoomButton = document.getElementById("honkpad-roomlist-createbutton"),
       compileButton = document.getElementById("honkpad-compile"),
       runButton = document.getElementById("honkpad-run"),
+      clearButton = document.getElementById("honkpad-clear"),
       aboutButton = document.getElementById("honkpad-about"),
       orientationButton = document.getElementById("honkpad-orientation"),
       resizeEl = document.getElementById("honkpad-log-resize"),
@@ -174,11 +175,13 @@ compileButton.addEventListener("click", e => {
 runButton.addEventListener("click", e => {
   socket.emit("exec:execute");
 });
+clearButton.addEventListener("click", e => {
+  clearLog();
+});
 createRoomButton.addEventListener("click", e => {
   (new RoomCreationPopup({
     onOkClick: (notif, e) => {
       const {roomName, languageName} = notif.formValues;
-      console.log(notif.formValues)
       if(roomName && languageName){
         notif.hide();
         joinRoom(roomName, languageName);

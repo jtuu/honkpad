@@ -151,6 +151,18 @@ body{
   background: hsl(120, 50%, 55%);
 }
 
+#honkpad-clear{
+  background: hsl(0, 0%, 50%);
+}
+
+#honkpad-clear:hover{
+  background: hsl(0, 0%, 60%);
+}
+
+#honkpad-clear:active{
+  background: hsl(0, 0%, 55%);
+}
+
 #honkpad-orientation{
   background: hsl(0, 0%, 5%);
 }
