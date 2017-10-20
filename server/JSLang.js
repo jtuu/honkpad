@@ -7,7 +7,7 @@ module.exports = class JSLang extends InterpretedLanguage{
   }
 
   async getInfo(){
-    const runtimeInfo = `${this.runtimeName.charAt(0).toUpperCase() + this.runtimeName.slice(1)}` + (await exec(`${this.runtimeName} --version`));
+    const runtimeInfo = `${this.runtimeName.charAt(0).toUpperCase() + this.runtimeName.slice(1)} ` + (await exec(`${this.runtimeName} --version`));
     const {DockerVersion, Architecture} = JSON.parse(await exec(`docker inspect ${this.dockerImageName}`))[0];
     const containerInfo = `${this.dockerImageName.charAt(0).toUpperCase() + this.dockerImageName.slice(1)} ${DockerVersion} (${Architecture})`;
 
