@@ -37,6 +37,10 @@ const logContainer = document.getElementById("honkpad-log"),
         "Go": {
           name: "Go",
           codemirrorMode: "text/x-go"
+        },
+        "Rust": {
+          name: "Rust",
+          codemirrorMode: "text/x-rustsrc"
         }
       },
       defaultLang = "C++";
