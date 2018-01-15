@@ -4,8 +4,12 @@ A collaborative code editor + compiler + runtime.
 ## Supported languages
 * C++
 * JavaScript
+* Rust
+* Go
 
 ## Requirements
-* Docker + the "ubuntu" image
+* Docker
 * GCC
 * Node.js
+* Rust
+* Go
