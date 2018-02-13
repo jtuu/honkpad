@@ -89,6 +89,9 @@ const ExecutableMixin = Base => class Executable extends Base{
     const filepath = `${this.workDir}/${filename}`;
     return [
       "run",
+      "--memory=128m",
+      "--memory-swap=128m",
+      "--cpus=0.2",
       this.runtimeName ? `--volume=/usr/bin/${this.runtimeName}:/usr/bin/${this.runtimeName}` : "", // mount runtime binary if any
       `--volume=${filepath}:/tmp/${filename}`, // mount executable
       "--rm=true",
