@@ -59,7 +59,7 @@ const ExecutableMixin = Base => class Executable extends Base{
       this.runtime.emit("output", data);
     });
     proc.stderr.on("data", data => {
-      this.runtime.emit("warning", data);
+      console.error("Honkpad Docker process stderr:", data);
     });
     proc.on("error", err => {
       console.error(err);
